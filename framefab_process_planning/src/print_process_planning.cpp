@@ -41,7 +41,7 @@ bool ProcessPlanningManager::handlePrintPlanning(framefab_msgs::ProcessPlanning:
   int index = req.index;
 
   // Enable Collision Checks
-//  hotend_model_->setCheckCollisions(true);
+  hotend_model_->setCheckCollisions(true);
 
   std::vector<framefab_msgs::ElementCandidatePoses> process_path = req.process_path;
   std::vector<moveit_msgs::CollisionObject> env_objs = req.env_collision_objs;
