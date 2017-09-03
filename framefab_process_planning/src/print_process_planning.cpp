@@ -41,7 +41,7 @@ bool ProcessPlanningManager::handlePrintPlanning(framefab_msgs::ProcessPlanning:
   int index = req.index;
 
   // Enable Collision Checks
-  hotend_model_->setCheckCollisions(true);
+//  hotend_model_->setCheckCollisions(true);
 
   std::vector<framefab_msgs::ElementCandidatePoses> process_path = req.process_path;
   std::vector<moveit_msgs::CollisionObject> env_objs = req.env_collision_objs;
@@ -55,7 +55,7 @@ bool ProcessPlanningManager::handlePrintPlanning(framefab_msgs::ProcessPlanning:
   const static double LINEAR_VEL = 0.01; // (m/s)
   const static double LINEAR_DISCRETIZATION = 0.01; // meters
   // the distance between angular steps about z for each orientation
-  const static double ANGULAR_DISCRETIZATION = M_PI / 12; // radians
+  const static double ANGULAR_DISCRETIZATION = M_PI / 4.0; // radians
   const static double RETRACT_DISTANCE = 0.005; // meters
 
   ConstrainedSegParameters constrained_seg_params;

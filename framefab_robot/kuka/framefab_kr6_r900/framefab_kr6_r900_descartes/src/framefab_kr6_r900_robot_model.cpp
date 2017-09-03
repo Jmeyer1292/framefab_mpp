@@ -44,6 +44,11 @@ bool FrameFabKr6R900RobotModel::initialize(const std::string& robot_description,
   return true;
 }
 
+void print(const std::vector<double>& sol)
+{
+  ROS_INFO("%f %f %f %f %f %f", sol[0], sol[1], sol[2], sol[3], sol[4], sol[5]);
+}
+
 bool FrameFabKr6R900RobotModel::getAllIK(const Eigen::Affine3d& pose,
                                     std::vector<std::vector<double> >& joint_poses) const
 {
@@ -65,6 +70,8 @@ bool FrameFabKr6R900RobotModel::getAllIK(const Eigen::Affine3d& pose,
       std::vector<double> sol;
       getSolution(solutions, s, sol);
 
+//      ROS_WARN("Start!");
+//      print(sol);
       if (isValid(sol))
         joint_poses.push_back(sol);
 
@@ -73,13 +80,22 @@ bool FrameFabKr6R900RobotModel::getAllIK(const Eigen::Affine3d& pose,
       // than this, then we need to check to see if we have extra solutions that have the same
       // configuration but a different joint position. In our case, joint 6 has this kind of
       // extra motion, so here we check for valid solutions 360 degrees from each solution.
+
+
+
       sol[5] += 2 * M_PI;
+//      print(sol);
       if (isValid(sol))
         joint_poses.push_back(sol);
 
       sol[5] -= 2 * 2 * M_PI;
+//      print(sol);
       if (isValid(sol))
         joint_poses.push_back(sol);
+
+
+
+
 
     }
   }

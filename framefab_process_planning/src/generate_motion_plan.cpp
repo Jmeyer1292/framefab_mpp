@@ -219,6 +219,7 @@ bool framefab_process_planning::generateMotionPlan(
 
   for (std::size_t i = 0; i < segs.size(); ++i)
   {
+//    if (i != 139) continue;
     model->setPlanningScene(planning_scenes[i]);
     if (true)
     {
@@ -246,10 +247,10 @@ bool framefab_process_planning::generateMotionPlan(
 
   // Next, we build a search for the whole problem
   const auto search_start = ros::Time::now();
-//  descartes_planner::DAGSearchLazyCollision search (final_graph);
-//  double cost = search.run(planning_scenes, graph_indices);
-  descartes_planner::DAGSearch search (final_graph);
-  double cost = search.run();
+  descartes_planner::DAGSearchLazyCollision search (final_graph);
+  double cost = search.run(planning_scenes, graph_indices);
+//  descartes_planner::DAGSearch search (final_graph);
+//  double cost = search.run();
 
   const auto search_end = ros::Time::now();
   ROS_INFO_STREAM("Search took " << (search_end-search_start).toSec() << " seconds and produced a result with dist = " << cost);
