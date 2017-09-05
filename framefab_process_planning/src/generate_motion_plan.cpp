@@ -163,6 +163,51 @@ static bool generateUnitProcessMotionPlan(
   return true;
 }
 
+
+std::vector<trajectory_msgs::JointTrajectory>
+planTransitions(descartes_core::RobotModelConstPtr model, descartes_planner::LadderGraph& final_graph,
+                const std::vector<std::size_t>& graph_indices, descartes_planner::DAGSearch& search,
+                moveit::core::RobotModelConstPtr moveit_model,
+                const std::vector<planning_scene::PlanningScenePtr>& scenes)
+{
+  auto path_idxs = search.shortestPath();
+
+  // we must consider the path from the start to the first process segment
+  // TODO
+
+  // we must consider each transition between process segments
+  for (std::size_t i = 0; i < graph_indices.size() - 1; ++i)
+  {
+    ROS_INFO_STREAM(i << " of " << graph_indices.size() - 1);
+    const auto start_segment_idx = i;
+    const auto next_segment_idx = i + 1;
+    ROS_INFO_STREAM("Considering transition between " << start_segment_idx << " and " << next_segment_idx);
+
+    // This is the planning scene containing the frame from 'start_segment_idx's process path
+    planning_scene::PlanningScenePtr scene = scenes[next_segment_idx];
+
+    // We have a nominal goals for the start and end poses
+    const auto start_point_idx = graph_indices[start_segment_idx] - 1;
+    const auto end_point_idx = graph_indices[start_segment_idx];
+
+    ROS_INFO_STREAM("Going from " << start_point_idx << " to point " << end_point_idx);
+
+    const auto* start_pose_data = final_graph.vertex(start_point_idx, path_idxs[start_point_idx]);
+    const auto* end_pose_data = final_graph.vertex(end_point_idx, path_idxs[end_point_idx]);
+
+    std::vector<double> start_pose (start_pose_data, start_pose_data + 6);
+    std::vector<double> end_pose (end_pose_data, end_pose_data + 6);
+
+
+
+  }
+
+  // we must consider the final departure back to some home position
+
+  return {};
+}
+
+
 #define SANITY_CHECK(cond) do { if ( !(cond) ) { throw std::runtime_error(#cond); } } while (false);
 
 bool framefab_process_planning::generateMotionPlan(
@@ -219,6 +264,7 @@ bool framefab_process_planning::generateMotionPlan(
 
   for (std::size_t i = 0; i < segs.size(); ++i)
   {
+//    if (i != 139) continue;
     model->setPlanningScene(planning_scenes[i]);
     if (true)
     {
@@ -254,11 +300,21 @@ bool framefab_process_planning::generateMotionPlan(
   const auto search_end = ros::Time::now();
   ROS_INFO_STREAM("Search took " << (search_end-search_start).toSec() << " seconds and produced a result with dist = " << cost);
 
-  // Now we have a rough solution for the entire process...
-
-
-  // What?
   auto path_idxs = search.shortestPath();
+
+  // Now we have a rough solution for the entire process...
+  std::vector<std::size_t> graph_start_indices;
+  for (const auto& g : graphs)
+  {
+    if (graph_start_indices.empty()) graph_start_indices.push_back(g.size());
+    else graph_start_indices.push_back(graph_start_indices.back() + g.size());
+  }
+
+  // Now we must plan transitions
+  planTransitions(model, final_graph, graph_start_indices, search, moveit_model, planning_scenes);
+
+
+
   DescartesTraj sol;
   for (size_t j = 0; j < path_idxs.size(); ++j)
   {
